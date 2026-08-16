@@ -10,25 +10,20 @@ import 'widgets/bottom_nav.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
-  runApp(const MilosCornerApp());
+  runApp(MelloApp(apiBaseUrl: dotenv.env['API_BASE_URL'] ?? 'https://ai-wellness-pet.onrender.com/api/v1'));
 }
 
-class MilosCornerApp extends StatelessWidget {
-  const MilosCornerApp({super.key});
+class MelloApp extends StatelessWidget {
+  final String apiBaseUrl;
+  const MelloApp({super.key, required this.apiBaseUrl});
 
   @override
   Widget build(BuildContext context) {
-    final baseUrl = dotenv.env['API_BASE_URL'] ??
-        const String.fromEnvironment(
-          'API_BASE_URL',
-          defaultValue: 'https://ai-wellness-pet.onrender.com/api/v1',
-        );
-
     return ChangeNotifierProvider(
-      create: (_) => PetProvider(ApiService(baseUrl: baseUrl))
+      create: (_) => PetProvider(ApiService(baseUrl: apiBaseUrl))
         ..loadFromStorage(),
       child: MaterialApp(
-        title: "Milo's Corner",
+        title: "Mello",
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light(),
         home: const _RootRouter(),
@@ -37,8 +32,6 @@ class MilosCornerApp extends StatelessWidget {
   }
 }
 
-/// Shows a splash while local storage loads, then routes to onboarding
-/// or straight into the app shell depending on whether setup is done.
 class _RootRouter extends StatelessWidget {
   const _RootRouter();
 
@@ -47,8 +40,6 @@ class _RootRouter extends StatelessWidget {
     return Consumer<PetProvider>(
       builder: (context, provider, _) {
         if (provider.userId == null && !provider.onboarded) {
-          // Still might be loading from storage on first frame; a tiny
-          // splash avoids a flash of the onboarding screen.
           return const OnboardingScreen();
         }
         if (provider.onboarded) {

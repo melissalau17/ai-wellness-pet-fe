@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../services/pet_provider.dart';
 import '../widgets/bottom_nav.dart';
 import 'activities_screen.dart';
+import 'chat_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -52,7 +53,20 @@ class _HomeScreenState extends State<HomeScreen> {
     final energy = pet?.energyScore ?? 50;
 
     return Scaffold(
-      appBar: buildMilosAppBar(),
+      appBar: buildMelloAppBar(context),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const ChatScreen()),
+          );
+        },
+        backgroundColor: AppColors.mintDark,
+        icon: const Icon(Icons.chat_bubble_rounded, color: Colors.white),
+        label: Text(
+          'Chat',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ),
       body: RefreshIndicator(
         onRefresh: provider.refreshPet,
         child: SingleChildScrollView(

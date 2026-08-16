@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/pet.dart';
 import '../models/daily_log.dart';
 import '../models/user.dart';
+import '../models/chat_message.dart';
 
 /// Thrown for any non-2xx response, carrying the backend's
 /// {"status":"error","message": "..."} payload when available.
@@ -57,7 +58,7 @@ class ApiService {
     try {
       // /health is at the root, not under /api/v1
       final rootUrl = baseUrl.replaceAll('/api/v1', '');
-      final res = await http.get(Uri.parse('$rootUrl/health'));
+      final res = await http.get(Uri.parse('$rootUrl/health')).timeout(const Duration(seconds: 40));
       return res.statusCode == 200;
     } catch (_) {
       return false;
@@ -76,7 +77,7 @@ class ApiService {
       _u('/user/register'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'name': name, 'email': email}),
-    );
+    ).timeout(const Duration(seconds: 40));
     
     // If the endpoint isn't deployed to Render yet, fallback to the demo user.
     if (res.statusCode == 404) {
@@ -98,25 +99,25 @@ class ApiService {
       _u('/pet/setup'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'user_id': userId, 'pet_name': petName}),
-    );
+    ).timeout(const Duration(seconds: 40));
     final body = _decode(res);
     return Pet.fromJson(body['pet'] as Map<String, dynamic>);
   }
 
   Future<Pet> getPet(String userId) async {
-    final res = await http.get(_u('/pet/$userId'));
+    final res = await http.get(_u('/pet/$userId')).timeout(const Duration(seconds: 40));
     final body = _decode(res);
     return Pet.fromJson(body['pet'] as Map<String, dynamic>);
   }
 
   Future<Pet> resetPet(String userId) async {
-    final res = await http.post(_u('/pet/$userId/reset'));
+    final res = await http.post(_u('/pet/$userId/reset')).timeout(const Duration(seconds: 40));
     final body = _decode(res);
     return Pet.fromJson(body['pet'] as Map<String, dynamic>);
   }
 
   Future<Pet> simulateNeglect(String userId) async {
-    final res = await http.post(_u('/pet/$userId/simulate-neglect'));
+    final res = await http.post(_u('/pet/$userId/simulate-neglect')).timeout(const Duration(seconds: 40));
     final body = _decode(res);
     return Pet.fromJson(body['pet'] as Map<String, dynamic>);
   }
@@ -139,7 +140,7 @@ class ApiService {
         'sleep_hours': sleepHours,
         'journal_text': journalText,
       }),
-    );
+    ).timeout(const Duration(seconds: 40));
     final body = _decode(res);
     final pet = Pet.fromJson(body['pet'] as Map<String, dynamic>);
     final aiMessage = body['ai_message'] as String? ?? '';
@@ -147,11 +148,50 @@ class ApiService {
   }
 
   Future<List<DailyLog>> getHistory(String userId) async {
-    final res = await http.get(_u('/activity/$userId'));
+    final res = await http.get(_u('/activity/$userId')).timeout(const Duration(seconds: 40));
     final body = _decode(res);
     final data = (body['data'] as List<dynamic>? ?? []);
     return data
         .map((e) => DailyLog.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  // ─── Chat ─────────────────────────────────────────────────────────
+
+  Future<String> createChatSession(String userId) async {
+    final res = await http.post(
+      _u('/chat/session'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'user_id': userId}),
+    ).timeout(const Duration(seconds: 40));
+    final body = _decode(res);
+    return body['session_id'] as String;
+  }
+
+  Future<String> sendMessage({
+    required String userId,
+    required String sessionId,
+    required String message,
+  }) async {
+    final res = await http.post(
+      _u('/chat'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'user_id': userId,
+        'session_id': sessionId,
+        'message': message,
+      }),
+    ).timeout(const Duration(seconds: 40));
+    final body = _decode(res);
+    return body['reply'] as String? ?? '';
+  }
+
+  Future<List<ChatMessage>> getChatHistory(String userId, String sessionId) async {
+    final res = await http.get(_u('/chat/$userId/$sessionId')).timeout(const Duration(seconds: 40));
+    final body = _decode(res);
+    final data = (body['data'] as List<dynamic>? ?? []);
+    return data
+        .map((e) => ChatMessage.fromJson(e as Map<String, dynamic>))
         .toList();
   }
 }

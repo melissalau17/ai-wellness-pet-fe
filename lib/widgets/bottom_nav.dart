@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/pet_provider.dart';
 import '../theme/app_theme.dart';
 import '../screens/home_screen.dart';
 import '../screens/activities_screen.dart';
@@ -86,7 +88,10 @@ class _AppShellState extends State<AppShell> {
 }
 
 /// Shared top app bar used on every tab.
-PreferredSizeWidget buildMilosAppBar() {
+PreferredSizeWidget buildMelloAppBar(BuildContext context) {
+  final provider = context.watch<PetProvider>();
+  final petName = provider.pet?.petName ?? 'My Pet';
+  
   return AppBar(
     titleSpacing: 16,
     title: Row(
@@ -98,7 +103,7 @@ PreferredSizeWidget buildMilosAppBar() {
         ),
         const SizedBox(width: 10),
         const Text(
-          "Milo's Corner",
+          "Mello",
           style: TextStyle(
             color: AppColors.mintDark,
             fontWeight: FontWeight.w800,

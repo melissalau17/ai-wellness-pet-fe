@@ -87,7 +87,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final provider = context.watch<PetProvider>();
 
     return Scaffold(
-      appBar: buildMilosAppBar(),
+      appBar: buildMelloAppBar(context),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),

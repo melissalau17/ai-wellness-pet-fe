@@ -28,21 +28,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final logs = provider.history;
 
     return Scaffold(
-      appBar: buildMilosAppBar(),
+      appBar: buildMelloAppBar(context),
       body: RefreshIndicator(
         onRefresh: provider.refreshHistory,
         child: logs.isEmpty
             ? ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(20),
-                children: const [
-                  _Header(),
-                  SizedBox(height: 60),
+                children: [
+                  const _Header(),
+                  const SizedBox(height: 60),
                   Center(
                     child: Text(
-                      'No entries yet.\nCheck in with Milo to start your journey!',
+                      'No entries yet.\nCheck in with ${provider.pet?.petName ?? 'your pet'} to start your journey!',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: AppColors.textMuted),
+                      style: const TextStyle(color: AppColors.textMuted),
                     ),
                   ),
                 ],
@@ -78,16 +78,17 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.only(bottom: 8),
+    final pet = context.watch<PetProvider>().pet;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Your Journey',
+          const Text('Your Journey',
               style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800)),
-          SizedBox(height: 4),
-          Text("A look back at Milo's recent days.",
-              style: TextStyle(color: AppColors.textMuted, fontSize: 15)),
+          const SizedBox(height: 4),
+          Text("A look back at ${pet?.petName ?? 'your pet'}'s recent days.",
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 14)),
         ],
       ),
     );

@@ -32,8 +32,9 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
     final ok = await provider.checkIn();
     if (!mounted) return;
     if (ok) {
+      final petName = provider.pet?.petName ?? 'Your pet';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Milo says: "${provider.lastAiMessage}"')),
+        SnackBar(content: Text('$petName says: "${provider.lastAiMessage}"')),
       );
     } else if (provider.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -48,7 +49,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
     const maxGlasses = 8;
 
     return Scaffold(
-      appBar: buildMilosAppBar(),
+      appBar: buildMelloAppBar(context),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
         child: Column(
@@ -250,18 +251,11 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                 onPressed: provider.isLoading ? null : () => _checkIn(provider),
                 child: provider.isLoading
                     ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
                       )
-                    : const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.pets_rounded, size: 18),
-                          SizedBox(width: 8),
-                          Text('Check-in with Milo'),
-                        ],
-                      ),
+                    : Text('Check-in with ${provider.pet?.petName ?? 'your pet'}'),
               ),
             ),
           ],

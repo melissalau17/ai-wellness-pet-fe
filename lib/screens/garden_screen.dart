@@ -16,7 +16,7 @@ class GardenScreen extends StatelessWidget {
     final pet = provider.pet;
 
     return Scaffold(
-      appBar: buildMilosAppBar(),
+      appBar: buildMelloAppBar(context),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -25,8 +25,8 @@ class GardenScreen extends StatelessWidget {
             const Text('Garden',
                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800)),
             const SizedBox(height: 4),
-            const Text(
-              'Coming soon: watch your garden grow as Milo thrives.',
+            Text(
+              'Coming soon: watch your garden grow as ${pet?.petName ?? 'your pet'} thrives.',
               style: TextStyle(color: AppColors.textMuted, fontSize: 15),
             ),
             const SizedBox(height: 24),
@@ -138,7 +138,15 @@ class GardenScreen extends StatelessWidget {
                     ),
                   );
                   if (confirmed == true && context.mounted) {
-                    await provider.logout();
+                    try {
+                      await context.read<PetProvider>().logout();
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Logout failed: $e')),
+                        );
+                      }
+                    }
                   }
                 },
                 icon: const Icon(Icons.logout_rounded,
